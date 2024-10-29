@@ -50,4 +50,4 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
           npm install -g serverless
-          serverless deploy --stage stg 
+          serverless deploy --stage stg --region ${{ secrets.AWS_REGION }}
