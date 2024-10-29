@@ -38,7 +38,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to AWS
-        if: github.ref == 'refs/heads/main' # Only deploy on main branch
+        if: github.ref == 'refs/heads/master' # Only deploy on main branch
         env:
           SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
           SUBNET_ID_1: ${{ secrets.SUBNET_ID_1 }}
