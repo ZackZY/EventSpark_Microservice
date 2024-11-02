@@ -48,6 +48,9 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_PORT: ${{ secrets.DB_PORT }}
+          COOKIE_DOMAIN: ${{ vars.COOKIE_DOMAIN }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm install -g serverless
           serverless deploy --stage stg --region ${{ secrets.AWS_REGION }}
