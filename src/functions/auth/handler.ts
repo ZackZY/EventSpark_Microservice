@@ -5,9 +5,10 @@ import pool from '@libs/database';
 import { queries } from '@libs/queries';
 import { User } from '@types/user';
 import { v4 as uuidv4 } from 'uuid';
+import { getCookieString, getClearCookieString, getCorsHeaders } from '@libs/cookie';
 
 // In production, store these securely in AWS Secrets Manager
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || '8a9102f052cae2dfd3a5115837ac0bcc667c1bb8c1a297f9b3045329473b031e';
 const SALT_ROUNDS = 10;
 
 export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -59,7 +60,6 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
       })
     };
   } catch (error) {
-    console.error('Registration error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal server error' })
@@ -71,6 +71,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
 
 export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const connection = await pool.getConnection();
+  const isOffline = !!process.env.IS_OFFLINE;
   
   try {
     const { email, password } = JSON.parse(event.body || '{}');
@@ -108,25 +109,34 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
       { 
         userId: user.id,
         email: user.email,
+        name: user.name,
         isAdmin: user.isAdmin 
       },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
+    const cookieString = getCookieString({
+      token,
+      isOffline
+    });
+
     return {
       statusCode: 200,
+      headers: {
+        'Set-Cookie': cookieString,
+        ...getCorsHeaders(event.headers.origin, isOffline)
+      },
       body: JSON.stringify({ 
-        token,
         user: {
           id: user.id,
           email: user.email,
+          name: user.name,
           isAdmin: user.isAdmin 
         }
       })
     };
   } catch (error) {
-    console.error('Login error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal server error' })
@@ -136,30 +146,64 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
   }
 };
 
+// Add a logout function to clear the cookie
+export const logout = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const isOffline = !!process.env.IS_OFFLINE;
+
+  return {
+    statusCode: 200,
+    headers: {
+      'Set-Cookie': getClearCookieString({ isOffline }),
+      ...getCorsHeaders(event.headers.origin, isOffline)
+    },
+    body: JSON.stringify({ success: true, message: 'Logged out successfully' })
+  };
+};
+
 export const verify = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const token = event.headers.Authorization?.replace('Bearer ', '');
+    // First try to get token from cookies
+    let token: string | undefined;
+
+    if (event.headers.Cookie) {
+      const cookies = event.headers.Cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+      }, {} as { [key: string]: string });
+      
+      token = cookies.token;
+    }
+
+    // Fallback to Authorization header if no cookie
+    if (!token && event.headers.Authorization) {
+      token = event.headers.Authorization.replace('Bearer ', '');
+    }
 
     if (!token) {
       return {
         statusCode: 401,
+        headers: getCorsHeaders(event.headers.origin),
         body: JSON.stringify({ message: 'No token provided' })
       };
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as { 
-      userId: number; 
+      userId: string; // Changed from number to string since we're using UUID
       email: string;
+      name: string;
       isAdmin: boolean; 
     };
     
     return {
       statusCode: 200,
+      headers: getCorsHeaders(event.headers.origin),
       body: JSON.stringify({ 
         valid: true, 
         user: {
           id: decoded.userId,
           email: decoded.email,
+          name: decoded.name,
           isAdmin: decoded.isAdmin 
         }
       })
@@ -167,7 +211,22 @@ export const verify = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
   } catch (error) {
     return {
       statusCode: 401,
+      headers: getCorsHeaders(event.headers.origin),
       body: JSON.stringify({ valid: false, message: 'Invalid token' })
     };
   }
 };
+
+// You might also want to create a reusable middleware for auth verification
+// export const verifyToken = (token: string) => {
+//   try {
+//     const decoded = jwt.verify(token, JWT_SECRET) as { 
+//       userId: string;
+//       email: string;
+//       isAdmin: boolean; 
+//     };
+//     return { valid: true, user: decoded };
+//   } catch (error) {
+//     return { valid: false, error: 'Invalid token' };
+//   }
+// };
