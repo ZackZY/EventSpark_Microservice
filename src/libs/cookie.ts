@@ -15,8 +15,8 @@ export const getCookieString = ({ token, isOffline = false }: CookieOptions): st
   return [
     `token=${token}`,
     'HttpOnly',
+    isOffline ? '' : 'Secure',
     'SameSite=Lax',
-    `Domain=${domain}`,
     'Path=/',
     'Max-Age=3600'
   ].filter(Boolean).join('; ');
@@ -28,8 +28,8 @@ export const getClearCookieString = ({ isOffline = false }: Omit<CookieOptions, 
   return [
     'token=',
     'HttpOnly',
+    isOffline ? '' : 'Secure',
     'SameSite=Lax',
-    `Domain=${domain}`,
     'Path=/',
     'Max-Age=0'
   ].filter(Boolean).join('; ');
