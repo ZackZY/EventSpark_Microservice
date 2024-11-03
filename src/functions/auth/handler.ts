@@ -21,6 +21,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
     if (!email || !password) {
       return {
         statusCode: 400,
+        headers: getCorsHeaders(event.headers.origin),
         body: JSON.stringify({ message: 'Email and password are required' })
       };
     }
@@ -30,6 +31,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
     if (!emailRegex.test(email)) {
       return {
         statusCode: 400,
+        headers: getCorsHeaders(event.headers.origin),
         body: JSON.stringify({ message: 'Invalid email format' })
       };
     }
@@ -39,6 +41,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
     if (Array.isArray(existingUsers) && existingUsers.length > 0) {
       return {
         statusCode: 409,
+        headers: getCorsHeaders(event.headers.origin),
         body: JSON.stringify({ message: 'User already exists' })
       };
     }
@@ -56,6 +59,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
       statusCode: 201,
       body: JSON.stringify({ 
         message: 'User registered successfully',
+        headers: getCorsHeaders(event.headers.origin),
         user: { id: userId, email }
       })
     };
@@ -63,6 +67,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
     console.log("REGISTER status code 500: " + error);
     return {
       statusCode: 500,
+      headers: getCorsHeaders(event.headers.origin),
       body: JSON.stringify({ message: 'Internal server error' })
     };
   } finally {
@@ -81,6 +86,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
     if (!email || !password) {
       return {
         statusCode: 400,
+        headers: getCorsHeaders(event.headers.origin, isOffline),
         body: JSON.stringify({ message: 'Email and password are required' })
       };
     }
@@ -92,6 +98,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
     if (!user) {
       return {
         statusCode: 401,
+        headers: getCorsHeaders(event.headers.origin, isOffline),
         body: JSON.stringify({ message: 'Invalid credentials' })
       };
     }
@@ -101,6 +108,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
     if (!isValidPassword) {
       return {
         statusCode: 401,
+        headers: getCorsHeaders(event.headers.origin,isOffline),
         body: JSON.stringify({ message: 'Invalid credentials' })
       };
     }
@@ -141,6 +149,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
     console.log("LOGIN status code 500: " + error);
     return {
       statusCode: 500,
+      headers: getCorsHeaders(event.headers.origin,isOffline),
       body: JSON.stringify({ message: 'Internal server error' })
     };
   } finally {
