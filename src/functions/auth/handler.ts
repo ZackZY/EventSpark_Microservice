@@ -77,7 +77,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
 
 export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const connection = await pool.getConnection();
-  const isOffline = !!process.env.IS_OFFLINE;
+  const isOffline = Boolean(process.env.IS_OFFLINE);
   
   try {
     const { email, password } = JSON.parse(event.body || '{}');
@@ -159,7 +159,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
 
 // Add a logout function to clear the cookie
 export const logout = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const isOffline = !!process.env.IS_OFFLINE;
+  const isOffline = Boolean(process.env.IS_OFFLINE);
 
   return {
     statusCode: 200,

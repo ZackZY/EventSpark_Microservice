@@ -43,5 +43,5 @@ export const getCorsHeaders = (origin?: string, isOffline = false) => ({
     ? 'http://localhost:3000'
     : (process.env.FRONTEND_URL || origin || ''),
   'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
 }); 
