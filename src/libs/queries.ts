@@ -11,7 +11,7 @@ export const queries = {
 
   UPDATE_ATTENDED_DT: `
     UPDATE EventAttendees
-    SET dateTimeAttended = NOW()
+    SET dateTimeAttended = NOW(), status = "attended"
     WHERE eventAttendeeHash = ?
   `,
 };
