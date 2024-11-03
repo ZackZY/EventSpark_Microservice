@@ -1,6 +1,6 @@
 export const queries = {
   INSERT_USER: `
-    INSERT INTO users (id, email, password, isAdmin, createdAt, updatedAt)
+    INSERT INTO Users (id, email, password, isAdmin, createdAt, updatedAt)
     VALUES (?, ?, ?, ?, NOW(), NOW())
   `,
 
