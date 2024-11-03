@@ -60,6 +60,7 @@ export const register = async (event: APIGatewayProxyEvent): Promise<APIGatewayP
       })
     };
   } catch (error) {
+    console.log("REGISTER status code 500: " + error);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal server error' })
@@ -137,6 +138,7 @@ export const login = async (event: APIGatewayProxyEvent): Promise<APIGatewayProx
       })
     };
   } catch (error) {
+    console.log("LOGIN status code 500: " + error);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal server error' })
@@ -209,6 +211,7 @@ export const verify = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       })
     };
   } catch (error) {
+    console.log("VERIFY status code 500: " + error);
     return {
       statusCode: 401,
       headers: getCorsHeaders(event.headers.origin),
