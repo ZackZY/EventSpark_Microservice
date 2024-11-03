@@ -40,6 +40,7 @@ jobs:
       - name: Deploy to AWS
         if: github.ref == 'refs/heads/master' # Only deploy on main branch
         env:
+          IS_OFFLINE: 'false'
           SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
           SUBNET_ID_1: ${{ secrets.SUBNET_ID_1 }}
           SUBNET_ID_2: ${{ secrets.SUBNET_ID_2 }}
