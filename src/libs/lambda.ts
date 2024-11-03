@@ -7,10 +7,10 @@ export const middyfy = (handler) => {
     .use(middyJsonBodyParser())
     .use(cors({
       credentials: true,
-      origin: '*',
-      headers: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token', 'X-Requested-With'],
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      exposedHeaders: ['*'],
-      maxAge: 86400,
+      origins: [
+        process.env.IS_OFFLINE === 'true' 
+          ? 'http://localhost:3000' 
+          : process.env.FRONTEND_URL
+      ]
     }));
 };
