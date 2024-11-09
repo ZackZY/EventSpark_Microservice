@@ -4,10 +4,10 @@ on:
   schedule:
     # Runs every day at 01:00 Singapore Standard Time (SGT)
     - cron: '0 17 * * *'
-  workflow_run:
-    workflows: [Deploy to AWS Lambda]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: [Deploy to AWS Lambda]
+  #   types:
+  #     - completed
   workflow_dispatch:
 
 jobs:
