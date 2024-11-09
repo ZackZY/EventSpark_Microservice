@@ -1,95 +1,108 @@
-# Serverless - AWS Node.js Typescript
+# EventSpark Microservice
 
-This project has been generated using the `aws-nodejs-typescript` template from the [Serverless framework](https://www.serverless.com/).
+A serverless backend service built with AWS Lambda, Node.js, and TypeScript.
 
-For detailed instructions, please refer to the [documentation](https://www.serverless.com/framework/docs/providers/aws/).
+## Prerequisites
 
-## Installation/deployment instructions
+- NodeJS `>=14.15.0`
+- AWS CLI configured with appropriate credentials
+- If using nvm, run `nvm use` to ensure correct Node version
 
-Depending on your preferred package manager, follow the instructions below to deploy your project.
-
-> **Requirements**: NodeJS `lts/fermium (v.14.15.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
+## Installation
 
 ### Using NPM
 
-- Run `npm i` to install the project dependencies
-- Run `npx sls deploy` to deploy this stack to AWS
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### Using Yarn
+2. Local Development:
+   ```bash
+   npm run dev        # Runs on http://localhost:4000
+   ```
 
-- Run `yarn` to install the project dependencies
-- Run `yarn sls deploy` to deploy this stack to AWS
+3. Deploy to AWS:
+   ```bash
+   npm run deploy
+   ```
 
-## Test your service
-
-This template contains a single lambda function triggered by an HTTP request made on the provisioned API Gateway REST API `/hello` route with `POST` method. The request body must be provided as `application/json`. The body structure is tested by API Gateway against `src/functions/hello/schema.ts` JSON-Schema definition: it must contain the `name` property.
-
-- requesting any other path than `/hello` with any other method than `POST` will result in API Gateway returning a `403` HTTP error code
-- sending a `POST` request to `/hello` with a payload **not** containing a string property named `name` will result in API Gateway returning a `400` HTTP error code
-- sending a `POST` request to `/hello` with a payload containing a string property named `name` will result in API Gateway returning a `200` HTTP status code with a message saluting the provided name and the detailed event processed by the lambda
-
-> :warning: As is, this template, once deployed, opens a **public** endpoint within your AWS account resources. Anybody with the URL can actively execute the API Gateway endpoint and the corresponding lambda. You should protect this endpoint with the authentication method of your choice.
-
-### Locally
-
-In order to test the hello function locally, run the following command:
-
-- `npx sls invoke local -f hello --path src/functions/hello/mock.json` if you're using NPM
-- `yarn sls invoke local -f hello --path src/functions/hello/mock.json` if you're using Yarn
-
-Check the [sls invoke local command documentation](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/) for more information.
-
-### Remotely
-
-Copy and replace your `url` - found in Serverless `deploy` command output - and `name` parameter in the following `curl` command in your terminal or in Postman to test your newly deployed application.
-
-```
-curl --location --request POST 'https://myApiEndpoint/dev/hello' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "name": "Frederic"
-}'
-```
-
-## Template features
-
-### Project structure
-
-The project code base is mainly located within the `src` folder. This folder is divided in:
-
-- `functions` - containing code base and configuration for your lambda functions
-- `libs` - containing shared code base between your lambdas
-
-```
+## Project Structure
 .
 ├── src
-│   ├── functions               # Lambda configuration and source code folder
-│   │   ├── hello
-│   │   │   ├── handler.ts      # `Hello` lambda source code
-│   │   │   ├── index.ts        # `Hello` lambda Serverless configuration
-│   │   │   ├── mock.json       # `Hello` lambda input parameter, if any, for local invocation
-│   │   │   └── schema.ts       # `Hello` lambda input event JSON-Schema
-│   │   │
-│   │   └── index.ts            # Import/export of all lambda configurations
-│   │
-│   └── libs                    # Lambda shared code
-│       └── apiGateway.ts       # API Gateway specific helpers
-│       └── handlerResolver.ts  # Sharable library for resolving lambda handlers
-│       └── lambda.ts           # Lambda middleware
+│ ├── functions # Lambda functions
+│ │ ├── auth # Authentication functions
+│ │ │ ├── handler.ts # Auth logic (login, register, verify)
+│ │ │ └── index.ts # Function configuration
+│ │ └── index.ts # Functions export
+│ │
+│ └── libs # Shared code
+│ ├── cookie.ts # Cookie management
+│ ├── database.ts # Database connection
+│ └── queries.ts # SQL queries
 │
 ├── package.json
-├── serverless.ts               # Serverless service file
-├── tsconfig.json               # Typescript compiler configuration
-├── tsconfig.paths.json         # Typescript paths
-└── webpack.config.js           # Webpack configuration
+├── serverless.ts # Serverless configuration
+└── tsconfig.json # TypeScript configuration
+
+## Features
+
+- User Authentication (Register, Login, Logout)
+- JWT-based token management
+- Secure cookie handling
+- CORS support
+- Local development environment
+- MySQL database integration
+
+## API Endpoints
+
+### Authentication
+
+#### Register
+- **POST** `/auth/register`
+- Body: `{ "email": "user@example.com", "password": "password" }`
+
+#### Login
+- **POST** `/auth/login`
+- Body: `{ "email": "user@example.com", "password": "password" }`
+
+#### Logout
+- **POST** `/auth/logout`
+
+#### Verify Token
+- **GET** `/auth/verify`
+
+## Security Features
+
+- HTTP-only cookies
+- CORS protection
+- JWT authentication
+- Password hashing with bcrypt
+- SameSite cookie policy
+- Secure cookie flags in production
+
+## Environment Variables
+
+Create a `.env` file with:
+
+```env
+JWT_SECRET=your_jwt_secret
+COOKIE_DOMAIN=your_domain
+FRONTEND_URL=your_frontend_url
+IS_OFFLINE=true  # For local development
 ```
 
-### 3rd party libraries
+## Dependencies
 
-- [json-schema-to-ts](https://github.com/ThomasAribart/json-schema-to-ts) - uses JSON-Schema definitions used by API Gateway for HTTP request validation to statically generate TypeScript types in your lambda's handler code base
-- [middy](https://github.com/middyjs/middy) - middleware engine for Node.Js lambda. This template uses [http-json-body-parser](https://github.com/middyjs/middy/tree/master/packages/http-json-body-parser) to convert API Gateway `event.body` property, originally passed as a stringified JSON, to its corresponding parsed object
-- [@serverless/typescript](https://github.com/serverless/typescript) - provides up-to-date TypeScript definitions for your `serverless.ts` service file
+Key packages used:
+- `@middy/core` - Middleware engine
+- `bcryptjs` - Password hashing
+- `jsonwebtoken` - JWT handling
+- `mysql2` - Database connectivity
+- `serverless` - Framework for AWS Lambda deployment
 
-### Advanced usage
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ZackZY_EventSpark_Microservice&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ZackZY_EventSpark_Microservice)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ZackZY_EventSpark_Microservice&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ZackZY_EventSpark_Microservice)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ZackZY_EventSpark_Microservice&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ZackZY_EventSpark_Microservice)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ZackZY_EventSpark_Microservice&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ZackZY_EventSpark_Microservice)
 
-Any tsconfig.json can be used, but if you do, set the environment variable `TS_NODE_CONFIG` for building the application, eg `TS_NODE_CONFIG=./tsconfig.app.json npx serverless webpack`
