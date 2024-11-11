@@ -10,7 +10,6 @@ export interface CookieOptions {
 }
 
 export const getCookieString = ({ token, isOffline = false }: CookieOptions): string => {
-  const domain = getDomain(isOffline);
   
   return [
     `token=${token}`,
@@ -23,7 +22,6 @@ export const getCookieString = ({ token, isOffline = false }: CookieOptions): st
 };
 
 export const getClearCookieString = ({ isOffline = false }: Omit<CookieOptions, 'token'>): string => {
-  const domain = getDomain(isOffline);
 
   return [
     'token=',
@@ -39,7 +37,7 @@ export const getCorsHeaders = (origin?: string, isOffline = false) => ({
   'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Allow-Origin': isOffline 
     ? 'http://localhost:3000'
-    : (process.env.FRONTEND_URL || origin || ''),
+    : (process.env.FRONTEND_URL || origin || '*'),
   'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
   'Access-Control-Allow-Headers': 'Content-Type'
 }); 

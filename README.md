@@ -4,7 +4,7 @@ A serverless backend service built with AWS Lambda, Node.js, and TypeScript.
 
 ## Prerequisites
 
-- NodeJS `>=14.15.0`
+- NodeJS `>=20`
 - AWS CLI configured with appropriate credentials
 - If using nvm, run `nvm use` to ensure correct Node version
 
@@ -30,20 +30,19 @@ A serverless backend service built with AWS Lambda, Node.js, and TypeScript.
 ## Project Structure
 .
 ├── src
-│ ├── functions # Lambda functions
-│ │ ├── auth # Authentication functions
-│ │ │ ├── handler.ts # Auth logic (login, register, verify)
-│ │ │ └── index.ts # Function configuration
-│ │ └── index.ts # Functions export
-│ │
-│ └── libs # Shared code
-│ ├── cookie.ts # Cookie management
-│ ├── database.ts # Database connection
-│ └── queries.ts # SQL queries
-│
-├── package.json
-├── serverless.ts # Serverless configuration
-└── tsconfig.json # TypeScript configuration
+│   ├── functions                    # Lambda functions
+│   │   ├── auth                     # Authentication functions
+│   │   │   ├── handler.ts           # Auth logic (login, register, verify)
+│   │   │   └── index.ts             # Function configuration
+│   │   └── index.ts                 # Functions export
+│   ├── libs                         # Shared code
+│   │   ├── cookie.ts                # Cookie management
+│   │   ├── database.ts              # Database connection
+│   │   └── queries.ts               # SQL queries
+├── package.json                     # Project dependencies
+├── serverless.ts                    # Serverless configuration
+└── tsconfig.json                    # TypeScript configuration
+
 
 ## Features
 
@@ -61,16 +60,51 @@ A serverless backend service built with AWS Lambda, Node.js, and TypeScript.
 #### Register
 - **POST** `/auth/register`
 - Body: `{ "email": "user@example.com", "password": "password" }`
+- Returns:
+  - 201: User registered successfully
+  - 400: Email and password are required
+  - 400: Invalid email format
+  - 409: User already exists
+  - 500: Internal server error
 
 #### Login
 - **POST** `/auth/login`
 - Body: `{ "email": "user@example.com", "password": "password" }`
+- Returns:
+  - 200: Successful login with user details and JWT token in cookies
+  - 400: Email and password are required
+  - 401: Invalid credentials
+  - 500: Internal server error
 
 #### Logout
 - **POST** `/auth/logout`
+- Returns:
+  - 200: Logged out successfully
 
 #### Verify Token
 - **GET** `/auth/verify`
+- Returns:
+  - 200: Valid token with user details
+  - 401: No token provided or invalid token
+
+### QR Check-in
+
+#### Check-in User
+- **POST** `/qrcheckin`
+- Body: `{ "eventHash": "string" }`
+- Returns:
+  - 201: User attendance taken successfully
+  - 400: Event hash required
+  - 411: User attendance update failed
+  - 500: Internal server error
+
+Response example (success):
+```json
+{
+  "statusCode": "201",
+  "message": "User attendance taken successfully"
+}
+```
 
 ## Security Features
 
