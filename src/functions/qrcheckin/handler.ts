@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import pool from "@libs/database";
 import { queries } from "@libs/queries";
 import { getCorsHeaders } from '@libs/cookie';
+import mysql from 'mysql2/promise';
 
 export const checkin = async (
   event: APIGatewayProxyEvent
@@ -14,7 +15,6 @@ export const checkin = async (
 
     // Validate input
     if (!eventHash) {
-      console.log("Validate input: " + eventHash);
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers.origin),
@@ -23,13 +23,12 @@ export const checkin = async (
     }
 
     // Update dateTimeAttended if eventHash is valid
-    const dateTimeAttended = await connection.execute(
+    const [result] = await connection.execute(
       queries.UPDATE_ATTENDED_DT,
       [eventHash]
-    );
-
+    ) as [mysql.ResultSetHeader, any];
     // console.log("DTA: " + JSON.stringify(dateTimeAttended));
-    if (dateTimeAttended[0].changedRows > 0) {
+    if (result[0].affectedRows > 0) {
       return {
         statusCode: 201,
         headers: getCorsHeaders(event.headers.origin),

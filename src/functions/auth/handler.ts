@@ -3,7 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import pool from '@libs/database';
 import { queries } from '@libs/queries';
-import { User } from '@types/user';
+import { User } from '../../types/user';
 import { v4 as uuidv4 } from 'uuid';
 import { getCookieString, getClearCookieString, getCorsHeaders } from '@libs/cookie';
 
